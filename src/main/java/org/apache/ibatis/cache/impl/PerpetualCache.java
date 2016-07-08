@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2014 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,45 +35,62 @@ public class PerpetualCache implements Cache {
     this.id = id;
   }
 
+  @Override
   public String getId() {
     return id;
   }
 
+  @Override
   public int getSize() {
     return cache.size();
   }
 
+  @Override
   public void putObject(Object key, Object value) {
     cache.put(key, value);
   }
 
+  @Override
   public Object getObject(Object key) {
     return cache.get(key);
   }
 
+  @Override
   public Object removeObject(Object key) {
     return cache.remove(key);
   }
 
+  @Override
   public void clear() {
     cache.clear();
   }
 
+  @Override
   public ReadWriteLock getReadWriteLock() {
     return null;
   }
 
+  @Override
   public boolean equals(Object o) {
-    if (getId() == null) throw new CacheException("Cache instances require an ID.");
-    if (this == o) return true;
-    if (!(o instanceof Cache)) return false;
+    if (getId() == null) {
+      throw new CacheException("Cache instances require an ID.");
+    }
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Cache)) {
+      return false;
+    }
 
     Cache otherCache = (Cache) o;
     return getId().equals(otherCache.getId());
   }
 
+  @Override
   public int hashCode() {
-    if (getId() == null) throw new CacheException("Cache instances require an ID.");
+    if (getId() == null) {
+      throw new CacheException("Cache instances require an ID.");
+    }
     return getId().hashCode();
   }
 

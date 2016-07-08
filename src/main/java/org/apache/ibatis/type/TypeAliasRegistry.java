@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -104,8 +104,11 @@ public class TypeAliasRegistry {
   // throws class cast exception as well if types cannot be assigned
   public <T> Class<T> resolveAlias(String string) {
     try {
-      if (string == null) return null;
-      String key = string.toLowerCase(Locale.ENGLISH); // issue #748
+      if (string == null) {
+        return null;
+      }
+      // issue #748
+      String key = string.toLowerCase(Locale.ENGLISH);
       Class<T> value;
       if (TYPE_ALIASES.containsKey(key)) {
         value = (Class<T>) TYPE_ALIASES.get(key);
@@ -145,8 +148,11 @@ public class TypeAliasRegistry {
   }
 
   public void registerAlias(String alias, Class<?> value) {
-    if (alias == null) throw new TypeException("The parameter alias cannot be null");
-    String key = alias.toLowerCase(Locale.ENGLISH); // issue #748
+    if (alias == null) {
+      throw new TypeException("The parameter alias cannot be null");
+    }
+    // issue #748
+    String key = alias.toLowerCase(Locale.ENGLISH);
     if (TYPE_ALIASES.containsKey(key) && TYPE_ALIASES.get(key) != null && !TYPE_ALIASES.get(key).equals(value)) {
       throw new TypeException("The alias '" + alias + "' is already mapped to the value '" + TYPE_ALIASES.get(key).getName() + "'.");
     }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,15 +30,23 @@ public class ExpressionEvaluator {
 
   public boolean evaluateBoolean(String expression, Object parameterObject) {
     Object value = OgnlCache.getValue(expression, parameterObject);
-    if (value instanceof Boolean) return (Boolean) value;
-    if (value instanceof Number) return !new BigDecimal(String.valueOf(value)).equals(BigDecimal.ZERO);
+    if (value instanceof Boolean) {
+      return (Boolean) value;
+    }
+    if (value instanceof Number) {
+        return !new BigDecimal(String.valueOf(value)).equals(BigDecimal.ZERO);
+    }
     return value != null;
   }
 
   public Iterable<?> evaluateIterable(String expression, Object parameterObject) {
     Object value = OgnlCache.getValue(expression, parameterObject);
-    if (value == null) throw new BuilderException("The expression '" + expression + "' evaluated to a null value.");
-    if (value instanceof Iterable) return (Iterable<?>) value;
+    if (value == null) {
+      throw new BuilderException("The expression '" + expression + "' evaluated to a null value.");
+    }
+    if (value instanceof Iterable) {
+      return (Iterable<?>) value;
+    }
     if (value.getClass().isArray()) {
         // the array may be primitive, so Arrays.asList() may throw
         // a ClassCastException (issue 209).  Do the work manually

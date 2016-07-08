@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.apache.ibatis.logging.LogFactory;
  * @author Ben Gunter
  */
 public abstract class VFS {
-  private static final Log log = LogFactory.getLog(ResolverUtil.class);
+  private static final Log log = LogFactory.getLog(VFS.class);
 
   /** The built-in implementations. */
   public static final Class<?>[] IMPLEMENTATIONS = { JBoss6VFS.class, DefaultVFS.class };
@@ -50,8 +50,9 @@ public abstract class VFS {
    */
   @SuppressWarnings("unchecked")
   public static VFS getInstance() {
-    if (instance != null)
+    if (instance != null) {
       return instance;
+    }
 
     // Try the user implementations first, then the built-ins
     List<Class<? extends VFS>> impls = new ArrayList<Class<? extends VFS>>();
@@ -65,8 +66,10 @@ public abstract class VFS {
       try {
         vfs = impl.newInstance();
         if (vfs == null || !vfs.isValid()) {
-          log.debug("VFS implementation " + impl.getName() +
+          if (log.isDebugEnabled()) {
+            log.debug("VFS implementation " + impl.getName() +
               " is not valid in this environment.");
+          }
         }
       } catch (InstantiationException e) {
         log.error("Failed to instantiate " + impl, e);
@@ -77,8 +80,11 @@ public abstract class VFS {
       }
     }
 
-    log.debug("Using VFS adapter " + vfs.getClass().getName());
-    return VFS.instance = vfs;
+    if (log.isDebugEnabled()) {
+      log.debug("Using VFS adapter " + vfs.getClass().getName());
+    }
+    VFS.instance = vfs;
+    return VFS.instance;
   }
 
   /**
@@ -88,8 +94,9 @@ public abstract class VFS {
    * @param clazz The {@link VFS} implementation class to add.
    */
   public static void addImplClass(Class<? extends VFS> clazz) {
-    if (clazz != null)
+    if (clazz != null) {
       USER_IMPLEMENTATIONS.add(clazz);
+    }
   }
 
   /** Get a class by name. If the class is not found then return null. */
@@ -98,7 +105,9 @@ public abstract class VFS {
       return Thread.currentThread().getContextClassLoader().loadClass(className);
 //      return ReflectUtil.findClass(className);
     } catch (ClassNotFoundException e) {
-      log.debug("Class not found: " + className);
+      if (log.isDebugEnabled()) {
+        log.debug("Class not found: " + className);
+      }
       return null;
     }
   }
@@ -111,11 +120,11 @@ public abstract class VFS {
    * @param parameterTypes The types of the parameters accepted by the method.
    */
   protected static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+    if (clazz == null) {
+      return null;
+    }
     try {
-      if (clazz == null)
-        return null;
-      else
-        return clazz.getMethod(methodName, parameterTypes);
+      return clazz.getMethod(methodName, parameterTypes);
     } catch (SecurityException e) {
       log.error("Security exception looking for method " + clazz.getName() + "." + methodName + ".  Cause: " + e);
       return null;
@@ -133,7 +142,7 @@ public abstract class VFS {
    * @param parameters The parameters to pass to the method.
    * @return Whatever the method returns.
    * @throws IOException If I/O errors occur
-   * @throws StripesRuntimeException If anything else goes wrong
+   * @throws RuntimeException If anything else goes wrong
    */
   @SuppressWarnings("unchecked")
   protected static <T> T invoke(Method method, Object object, Object... parameters)
@@ -145,10 +154,11 @@ public abstract class VFS {
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     } catch (InvocationTargetException e) {
-      if (e.getTargetException() instanceof IOException)
+      if (e.getTargetException() instanceof IOException) {
         throw (IOException) e.getTargetException();
-      else
+      } else {
         throw new RuntimeException(e);
+      }
     }
   }
 

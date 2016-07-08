@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
     this.rs = rs;
   }
 
+  @Override
   public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
     try {
       if (Object.class.equals(method.getDeclaringClass())) {
@@ -97,12 +98,14 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
       }
       String colname = rsmd.getColumnLabel(i);
       row.append(colname);
-      if (i != columnCount) row.append(", ");
+      if (i != columnCount) {
+        row.append(", ");
+      }
     }
     trace(row.toString(), false);
   }
 
-  private void printColumnValues(int columnCount) throws SQLException {
+  private void printColumnValues(int columnCount) {
     StringBuilder row = new StringBuilder();
     row.append("       Row: ");
     for (int i = 1; i <= columnCount; i++) {
@@ -118,7 +121,9 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
         colname = "<<Cannot Display>>";
       }
       row.append(colname);
-      if (i != columnCount) row.append(", ");
+      if (i != columnCount) {
+        row.append(", ");
+      }
     }
     trace(row.toString(), false);
   }

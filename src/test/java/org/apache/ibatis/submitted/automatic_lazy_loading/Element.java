@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,25 +17,24 @@ package org.apache.ibatis.submitted.automatic_lazy_loading;
 
 import java.io.Serializable;
 
-public class Element 
-implements Serializable {
-	private Element element;
+public class Element implements Serializable {
+  private Element element;
 
-	private String value;
+  private String value;
 
-	public Element getElement() {
-		return element;
-	}
+  public Element getElement() {
+    return element;
+  }
 
-	public void setElement(Element anElement) {
-		element = anElement;
-	}
+  public void setElement(Element anElement) {
+    element = anElement;
+  }
 
-	public String getValue() {
-		return value;
-	}
+  public String getValue() {
+    return value;
+  }
 
-	public void setValue(String aValue) {
-		value = aValue;
-	}
+  public void setValue(String aValue) {
+    value = aValue;
+  }
 }

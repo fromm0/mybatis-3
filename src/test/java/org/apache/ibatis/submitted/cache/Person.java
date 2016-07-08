@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,50 +19,49 @@ import java.io.Serializable;
 
 public class Person implements Serializable {
   
-	private int id;
-	private String firstname;
-	private String lastname;
-	
-	public Person() {}
-	
-	public Person(int id, String firstname, String lastname) {
-	  setId(id);
-		setFirstname(firstname);
-		setLastname(lastname);
-	}
-	
-	public int getId() {
-		return id;
-	}
-	
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	public String getFirstname() {
-		return firstname;
-	}
-	
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
-	
-	public String getLastname() {
-		return lastname;
-	}
-	
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
+  private int id;
+  private String firstname;
+  private String lastname;
+  
+  public Person() {}
+  
+  public Person(int id, String firstname, String lastname) {
+    setId(id);
+    setFirstname(firstname);
+    setLastname(lastname);
+  }
+  
+  public int getId() {
+    return id;
+  }
+  
+  public void setId(int id) {
+    this.id = id;
+  }
+  
+  public String getFirstname() {
+    return firstname;
+  }
+  
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+  
+  public String getLastname() {
+    return lastname;
+  }
+  
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("id=" + id);
-		sb.append(", lastname=" + lastname);
-		sb.append(", firstname=" + firstname);
-		return sb.toString();
-	}
-	
-	
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("id=" + id);
+    sb.append(", lastname=" + lastname);
+    sb.append(", firstname=" + firstname);
+    return sb.toString();
+  }
+
 }

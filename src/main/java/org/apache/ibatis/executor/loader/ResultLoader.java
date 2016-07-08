@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -86,11 +86,15 @@ public class ResultLoader {
     }
   }
 
-  private Executor newExecutor() throws SQLException {
+  private Executor newExecutor() {
     final Environment environment = configuration.getEnvironment();
-    if (environment == null) throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+    if (environment == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+    }
     final DataSource ds = environment.getDataSource();
-    if (ds == null) throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+    if (ds == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+    }
     final TransactionFactory transactionFactory = environment.getTransactionFactory();
     final Transaction tx = transactionFactory.newTransaction(ds, null, false);
     return configuration.newExecutor(tx, ExecutorType.SIMPLE);

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -59,18 +59,22 @@ public class PropertyTokenizer implements Iterable<PropertyTokenizer>, Iterator<
     return children;
   }
 
+  @Override
   public boolean hasNext() {
     return children != null;
   }
 
+  @Override
   public PropertyTokenizer next() {
     return new PropertyTokenizer(children);
   }
 
+  @Override
   public void remove() {
     throw new UnsupportedOperationException("Remove is not supported, as it has no meaning in the context of properties.");
   }
 
+  @Override
   public Iterator<PropertyTokenizer> iterator() {
     return this;
   }

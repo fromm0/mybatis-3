@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2014 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -97,11 +97,7 @@ class PooledConnection implements InvocationHandler {
    * @return The hashcode of the real connection (or 0 if it is null)
    */
   public int getRealHashCode() {
-    if (realConnection == null) {
-      return 0;
-    } else {
-      return realConnection.hashCode();
-    }
+    return realConnection == null ? 0 : realConnection.hashCode();
   }
 
   /*
@@ -203,6 +199,7 @@ class PooledConnection implements InvocationHandler {
     return System.currentTimeMillis() - checkoutTimestamp;
   }
 
+  @Override
   public int hashCode() {
     return hashCode;
   }
@@ -213,6 +210,7 @@ class PooledConnection implements InvocationHandler {
    * @param obj - the other connection to test for equality
    * @see Object#equals(Object)
    */
+  @Override
   public boolean equals(Object obj) {
     if (obj instanceof PooledConnection) {
       return realConnection.hashCode() == (((PooledConnection) obj).realConnection.hashCode());
@@ -231,6 +229,7 @@ class PooledConnection implements InvocationHandler {
    * @param args   - the parameters to be passed to the method
    * @see java.lang.reflect.InvocationHandler#invoke(Object, java.lang.reflect.Method, Object[])
    */
+  @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {

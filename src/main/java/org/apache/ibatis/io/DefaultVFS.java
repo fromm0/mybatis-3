@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.apache.ibatis.logging.LogFactory;
  * @author Ben Gunter
  */
 public class DefaultVFS extends VFS {
-  private static final Log log = LogFactory.getLog(ResolverUtil.class);
+  private static final Log log = LogFactory.getLog(DefaultVFS.class);
 
   /** The magic header that indicates a JAR (ZIP) file. */
   private static final byte[] JAR_MAGIC = { 'P', 'K', 3, 4 };
@@ -61,7 +61,9 @@ public class DefaultVFS extends VFS {
       URL jarUrl = findJarForResource(url);
       if (jarUrl != null) {
         is = jarUrl.openStream();
-        log.debug("Listing " + url);
+        if (log.isDebugEnabled()) {
+          log.debug("Listing " + url);
+        }
         resources = listResources(new JarInputStream(is), path);
       }
       else {
@@ -72,11 +74,16 @@ public class DefaultVFS extends VFS {
             // referenced by the URL isn't actually a JAR
             is = url.openStream();
             JarInputStream jarInput = new JarInputStream(is);
-            log.debug("Listing " + url);
+            if (log.isDebugEnabled()) {
+              log.debug("Listing " + url);
+            }
             for (JarEntry entry; (entry = jarInput.getNextJarEntry()) != null;) {
-              log.debug("Jar entry: " + entry.getName());
+              if (log.isDebugEnabled()) {
+                log.debug("Jar entry: " + entry.getName());
+              }
               children.add(entry.getName());
             }
+            jarInput.close();
           }
           else {
             /*
@@ -91,7 +98,9 @@ public class DefaultVFS extends VFS {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             List<String> lines = new ArrayList<String>();
             for (String line; (line = reader.readLine()) != null;) {
-              log.debug("Reader entry: " + line);
+              if (log.isDebugEnabled()) {
+                log.debug("Reader entry: " + line);
+              }
               lines.add(line);
               if (getResources(path + "/" + line).isEmpty()) {
                 lines.clear();
@@ -100,7 +109,9 @@ public class DefaultVFS extends VFS {
             }
 
             if (!lines.isEmpty()) {
-              log.debug("Listing " + url);
+              if (log.isDebugEnabled()) {
+                log.debug("Listing " + url);
+              }
               children.addAll(lines);
             }
           }
@@ -112,9 +123,13 @@ public class DefaultVFS extends VFS {
            */
           if ("file".equals(url.getProtocol())) {
             File file = new File(url.getFile());
-            log.debug("Listing directory " + file.getAbsolutePath());
+            if (log.isDebugEnabled()) {
+                log.debug("Listing directory " + file.getAbsolutePath());
+            }
             if (file.isDirectory()) {
-              log.debug("Listing " + url);
+              if (log.isDebugEnabled()) {
+                  log.debug("Listing " + url);
+              }
               children = Arrays.asList(file.list());
             }
           }
@@ -126,8 +141,9 @@ public class DefaultVFS extends VFS {
 
         // The URL prefix to use when recursively listing child resources
         String prefix = url.toExternalForm();
-        if (!prefix.endsWith("/"))
+        if (!prefix.endsWith("/")) {
           prefix = prefix + "/";
+        }
 
         // Iterate over immediate children, adding files and recursing into directories
         for (String child : children) {
@@ -140,10 +156,12 @@ public class DefaultVFS extends VFS {
 
       return resources;
     } finally {
-      try {
-        if (is != null)
+      if (is != null) {
+        try {
           is.close();
-      } catch (Exception e) {
+        } catch (Exception e) {
+          // Ignore
+        }
       }
     }
   }
@@ -159,10 +177,12 @@ public class DefaultVFS extends VFS {
    */
   protected List<String> listResources(JarInputStream jar, String path) throws IOException {
     // Include the leading and trailing slash when matching names
-    if (!path.startsWith("/"))
+    if (!path.startsWith("/")) {
       path = "/" + path;
-    if (!path.endsWith("/"))
+    }
+    if (!path.endsWith("/")) {
       path = path + "/";
+    }
 
     // Iterate over the entries and collect those that begin with the requested path
     List<String> resources = new ArrayList<String>();
@@ -170,13 +190,17 @@ public class DefaultVFS extends VFS {
       if (!entry.isDirectory()) {
         // Add leading slash if it's missing
         String name = entry.getName();
-        if (!name.startsWith("/"))
+        if (!name.startsWith("/")) {
           name = "/" + name;
+        }
 
         // Check file name
         if (name.startsWith(path)) {
-          log.debug("Found resource: " + name);
-          resources.add(name.substring(1)); // Trim leading slash
+          if (log.isDebugEnabled()) {
+            log.debug("Found resource: " + name);
+          }
+          // Trim leading slash
+          resources.add(name.substring(1));
         }
       }
     }
@@ -194,13 +218,17 @@ public class DefaultVFS extends VFS {
    * @throws MalformedURLException
    */
   protected URL findJarForResource(URL url) throws MalformedURLException {
-    log.debug("Find JAR URL: " + url);
+    if (log.isDebugEnabled()) {
+      log.debug("Find JAR URL: " + url);
+    }
 
     // If the file part of the URL is itself a URL, then that URL probably points to the JAR
     try {
       for (;;) {
         url = new URL(url.getFile());
-        log.debug("Inner URL: " + url);
+        if (log.isDebugEnabled()) {
+          log.debug("Inner URL: " + url);
+        }
       }
     } catch (MalformedURLException e) {
       // This will happen at some point and serves as a break in the loop
@@ -211,10 +239,14 @@ public class DefaultVFS extends VFS {
     int index = jarUrl.lastIndexOf(".jar");
     if (index >= 0) {
       jarUrl.setLength(index + 4);
-      log.debug("Extracted JAR URL: " + jarUrl);
+      if (log.isDebugEnabled()) {
+        log.debug("Extracted JAR URL: " + jarUrl);
+      }
     }
     else {
-      log.debug("Not a JAR: " + jarUrl);
+      if (log.isDebugEnabled()) {
+        log.debug("Not a JAR: " + jarUrl);
+      }
       return null;
     }
 
@@ -226,7 +258,9 @@ public class DefaultVFS extends VFS {
       }
       else {
         // WebLogic fix: check if the URL's file exists in the filesystem.
-        log.debug("Not a JAR: " + jarUrl);
+        if (log.isDebugEnabled()) {
+          log.debug("Not a JAR: " + jarUrl);
+        }
         jarUrl.replace(0, jarUrl.length(), testUrl.getFile());
         File file = new File(jarUrl.toString());
 
@@ -240,7 +274,9 @@ public class DefaultVFS extends VFS {
         }
 
         if (file.exists()) {
-          log.debug("Trying real file: " + file.getAbsolutePath());
+          if (log.isDebugEnabled()) {
+            log.debug("Trying real file: " + file.getAbsolutePath());
+          }
           testUrl = file.toURI().toURL();
           if (isJar(testUrl)) {
             return testUrl;
@@ -251,7 +287,9 @@ public class DefaultVFS extends VFS {
       log.warn("Invalid JAR URL: " + jarUrl);
     }
 
-    log.debug("Not a JAR: " + jarUrl);
+    if (log.isDebugEnabled()) {
+      log.debug("Not a JAR: " + jarUrl);
+    }
     return null;
   }
 
@@ -288,15 +326,20 @@ public class DefaultVFS extends VFS {
       is = url.openStream();
       is.read(buffer, 0, JAR_MAGIC.length);
       if (Arrays.equals(buffer, JAR_MAGIC)) {
-        log.debug("Found JAR: " + url);
+        if (log.isDebugEnabled()) {
+          log.debug("Found JAR: " + url);
+        }
         return true;
       }
     } catch (Exception e) {
       // Failure to read the stream means this is not a JAR
     } finally {
-      try {
-        is.close();
-      } catch (Exception e) {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (Exception e) {
+          // Ignore
+        }
       }
     }
 

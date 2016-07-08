@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright 2010-2012 the original author or authors.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+       Copyright 2009-2016 the original author or authors.
 
-  http://www.apache.org/licenses/LICENSE-2.0
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
 -->
-
-<!-- version: $Id$ -->
-
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
@@ -220,14 +219,14 @@ ps.setInt(1,id);]]></source>
   timeout="20">
 
 <update
-  id="insertAuthor"
+  id="updateAuthor"
   parameterType="domain.blog.Author"
   flushCache="true"
   statementType="PREPARED"
   timeout="20">
 
 <delete
-  id="insertAuthor"
+  id="deleteAuthor"
   parameterType="domain.blog.Author"
   flushCache="true"
   statementType="PREPARED"
@@ -334,6 +333,18 @@ Por ejemplo, si la columna id de la tabla Author del ejemplo siguiente fuera aut
   values (#{username},#{password},#{email},#{bio})
 </insert>]]></source>
 
+        <p>
+          If your database also supports multi-row insert, you can pass a list or an array of <code>Author</code>s and retrieve the auto-generated keys.
+        </p>
+
+        <source><![CDATA[<insert id="insertAuthor" useGeneratedKeys="true"
+    keyProperty="id">
+  insert into Author (username, password, email, bio) values
+  <foreach item="item" collection="list" separator=",">
+    (#{item.username}, #{item.password}, #{item.email}, #{item.bio})
+  </foreach>
+</insert>]]></source>
+
         <p>MyBatis puede tratar las claves autogeneradas de otra forma para el caso de las bases de datos que no soportan columnas autogeneradas, o porque su driver JDBC no haya incluido aun dicho soporte.
         </p>
 
@@ -397,18 +408,43 @@ Por ejemplo, si la columna id de la tabla Author del ejemplo siguiente fuera aut
       </subsection>
 
       <subsection name="sql">
-        <p>Este elemento se utiliza para definir un fragmento reusable de código SQL que puede ser incluido en otras sentencias. Por ejemplo:
+        <p>Este elemento se utiliza para definir un fragmento reusable de código SQL que puede ser incluido en otras sentencias. It can be statically (during load phase) parametrized. Different property values can
+          vary in include instances. Por ejemplo:
         </p>
 
-        <source><![CDATA[<sql id="userColumns"> id,username,password </sql>]]></source>
+        <source><![CDATA[<sql id="userColumns"> ${alias}.id,${alias}.username,${alias}.password </sql>]]></source>
 
         <p>Este fragmento de SQL puede ser incluido en otra sentencia, por ejemplo:
         </p>
 
         <source><![CDATA[<select id="selectUsers" resultType="map">
-  select <include refid="userColumns"/>
-  from some_table
-  where id = #{id}
+  select
+    <include refid="userColumns"><property name="alias" value="t1"/></include>,
+    <include refid="userColumns"><property name="alias" value="t2"/></include>
+  from some_table t1
+    cross join some_table t2
+</select>]]></source>
+
+        <p>
+          Property value can be also used in include refid attribute or property values inside include clause, for example:
+        </p>
+
+        <source><![CDATA[<sql id="sometable">
+  ${prefix}Table
+</sql>
+
+<sql id="someinclude">
+  from
+    <include refid="${include_target}"/>
+</sql>
+
+<select id="select" resultType="map">
+  select
+    field1, field2, field3
+  <include refid="someinclude">
+    <property name="prefix" value="Some"/>
+    <property name="include_target" value="sometable"/>
+  </include>
 </select>]]></source>
       </subsection>
 
@@ -1247,7 +1283,7 @@ SELECT * FROM AUTHOR WHERE ID = #{id}]]></source>
         <p>Se debe proporcionar un nombre a cada resultset informando el atributo 
         <code>resultSets</code> del mapped statement con una lista de nombres separados por comas.</p>
 
-        <source><![CDATA[<select id="selectBlog" resultSets="blogs,authors" resultMap="blogResult">
+        <source><![CDATA[<select id="selectBlog" resultSets="blogs,authors" resultMap="blogResult" statementType="CALLABLE">
   {call getBlogsAndAuthors(#{id,jdbcType=INTEGER,mode=IN})}
 </select>
 ]]></source>
@@ -1510,7 +1546,7 @@ SELECT * FROM POST WHERE BLOG_ID = #{id}]]></source>
           presentes en el ResultSet y que no tienen un mapeo manual se auto-mapearán. Posteriormente se procesarán los mapeos manuales.
           En el siguiente ejemplo las columnas <i>id</i> y <i>userName</i> se auto-mapearán y la columna <i>hashed_password</i> se mapeará manualmente.</p>
 
-        <source><![CDATA[<select id="selectUsers" resultType="User">
+        <source><![CDATA[<select id="selectUsers" resultMap="userResultMap">
   select
     user_id             as "id",
     user_name           as "userName",
@@ -1555,7 +1591,7 @@ SELECT * FROM POST WHERE BLOG_ID = #{id}]]></source>
 </select>]]></source>
 
         <source><![CDATA[<resultMap id="blogResult" type="Blog">
-  <association property="author" javaType="Author" resultMap="authorResult"/>
+  <association property="author" resultMap="authorResult"/>
 </resultMap>
 
 <resultMap id="authorResult" type="Author">
@@ -1569,18 +1605,13 @@ SELECT * FROM POST WHERE BLOG_ID = #{id}]]></source>
         </p>
 
         <p>
-          Independientemente del nivel de auto-mapeo configurado puedes activar o desactivar el auto-mapeo para un statement especifico
+          Independientemente del nivel de auto-mapeo configurado puedes activar o desactivar el auto-mapeo para un ResultMap especifico
           añadiendole el atributo<code>autoMapping</code>:
         </p>
 
-        <source><![CDATA[<select id="selectUsers" resultType="User" autoMapping="false">
-  select
-    user_id             as "id",
-    user_name           as "userName",
-    hashed_password
-  from some_table
-  where id = #{id}
-</select>]]></source>
+        <source><![CDATA[<resultMap id="userResultMap" type="User" autoMapping="false">
+  <result property="password" column="hashed_password"/>
+</resultMap>]]></source>
        
        
       </subsection>

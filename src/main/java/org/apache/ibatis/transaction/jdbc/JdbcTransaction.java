@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.apache.ibatis.transaction.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.ibatis.logging.Log;
@@ -32,10 +31,9 @@ import org.apache.ibatis.transaction.TransactionException;
  * Delays connection retrieval until getConnection() is called.
  * Ignores commit or rollback requests when autocommit is on.
  *
- * @see JdbcTransactionFactory
- */
-/**
  * @author Clinton Begin
+ *
+ * @see JdbcTransactionFactory
  */
 public class JdbcTransaction implements Transaction {
 
@@ -56,6 +54,7 @@ public class JdbcTransaction implements Transaction {
     this.connection = connection;
   }
 
+  @Override
   public Connection getConnection() throws SQLException {
     if (connection == null) {
       openConnection();
@@ -63,6 +62,7 @@ public class JdbcTransaction implements Transaction {
     return connection;
   }
 
+  @Override
   public void commit() throws SQLException {
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
@@ -72,6 +72,7 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  @Override
   public void rollback() throws SQLException {
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
@@ -81,6 +82,7 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  @Override
   public void close() throws SQLException {
     if (connection != null) {
       resetAutoCommit();
@@ -122,8 +124,10 @@ public class JdbcTransaction implements Transaction {
         connection.setAutoCommit(true);
       }
     } catch (SQLException e) {
-      log.debug("Error resetting autocommit to true "
+      if (log.isDebugEnabled()) {
+        log.debug("Error resetting autocommit to true "
           + "before closing the connection.  Cause: " + e);
+      }
     }
   }
 
@@ -138,4 +142,9 @@ public class JdbcTransaction implements Transaction {
     setDesiredAutoCommit(autoCommmit);
   }
 
+  @Override
+  public Integer getTimeout() throws SQLException {
+    return null;
+  }
+  
 }

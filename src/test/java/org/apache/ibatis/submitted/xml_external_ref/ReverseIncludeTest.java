@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ public class ReverseIncludeTest {
 
   @Test
   public void testReverseIncludeXmlConfig() throws Exception {
-	  testReverseIncludes(getSqlSessionFactoryXmlConfig());
+    testReverseIncludes(getSqlSessionFactoryXmlConfig());
   }
 
   @Test
   public void testReverseIncludeJavaConfig() throws Exception {
-	  testReverseIncludes(getSqlSessionFactoryJavaConfig());
+    testReverseIncludes(getSqlSessionFactoryJavaConfig());
   }
 
   private void testReverseIncludes(SqlSessionFactory sqlSessionFactory) throws Exception {

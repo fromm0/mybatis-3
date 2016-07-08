@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ public class TypeAliasRegistryTest {
   public void shouldRegisterAndResolveTypeAlias() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
 
-    typeAliasRegistry.registerAlias("rich", "domain.misc.RichType");
+    typeAliasRegistry.registerAlias("rich", "org.apache.ibatis.domain.misc.RichType");
 
-    assertEquals("domain.misc.RichType", typeAliasRegistry.resolveAlias("rich").getName());
+    assertEquals("org.apache.ibatis.domain.misc.RichType", typeAliasRegistry.resolveAlias("rich").getName());
   }
 
   @Test

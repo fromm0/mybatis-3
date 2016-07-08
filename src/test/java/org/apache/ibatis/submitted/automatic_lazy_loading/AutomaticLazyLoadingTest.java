@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class AutomaticLazyLoadingTest {
   @Test
   public void selectElementValue_default_nomethods()
   throws Exception {
-	  testScenario("default", true, noMethods);
+    testScenario("default", true, noMethods);
   }
 
   /**
@@ -79,7 +79,7 @@ public class AutomaticLazyLoadingTest {
   @Test
   public void selectElementValue_disabled_nomethods()
   throws Exception {
-	  testScenario("disabled", true, noMethods);
+    testScenario("disabled", true, noMethods);
   }
 
   /**
@@ -100,7 +100,7 @@ public class AutomaticLazyLoadingTest {
   @Test
   public void selectElementValue_enabled_nomethods()
   throws Exception {
-	  testScenario("enabled", true, noMethods);
+    testScenario("enabled", true, noMethods);
   }
 
   /**

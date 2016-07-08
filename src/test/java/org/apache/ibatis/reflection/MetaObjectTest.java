@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,13 +27,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.domain.blog.Author;
+import org.apache.ibatis.domain.blog.Section;
+import org.apache.ibatis.domain.misc.CustomBeanWrapper;
+import org.apache.ibatis.domain.misc.CustomBeanWrapperFactory;
+import org.apache.ibatis.domain.misc.RichType;
 import org.junit.Test;
-
-import domain.blog.Author;
-import domain.blog.Section;
-import domain.misc.CustomBeanWrapper;
-import domain.misc.CustomBeanWrapperFactory;
-import domain.misc.RichType;
 
 public class MetaObjectTest {
 
@@ -270,12 +269,12 @@ public class MetaObjectTest {
     MetaObject meta = SystemMetaObject.forObject(new Author());
     assertTrue(!meta.getObjectWrapper().getClass().equals(CustomBeanWrapper.class));
   }
-  
+
   @Test
   public void shouldUseObjectWrapperFactoryWhenSet() {
-    MetaObject meta = MetaObject.forObject(new Author(), SystemMetaObject.DEFAULT_OBJECT_FACTORY, new CustomBeanWrapperFactory());
+    MetaObject meta = MetaObject.forObject(new Author(), SystemMetaObject.DEFAULT_OBJECT_FACTORY, new CustomBeanWrapperFactory(), new DefaultReflectorFactory());
     assertTrue(meta.getObjectWrapper().getClass().equals(CustomBeanWrapper.class));
-    
+
     // Make sure the old default factory is in place and still works
     meta = SystemMetaObject.forObject(new Author());
     assertFalse(meta.getObjectWrapper().getClass().equals(CustomBeanWrapper.class));
@@ -283,24 +282,24 @@ public class MetaObjectTest {
 
   @Test
   public void shouldMethodHasGetterReturnTrueWhenListElementSet() {
-	  List<Object> param1 = new ArrayList<Object>();
-	  param1.add("firstParam");
-	  param1.add(222);
-	  param1.add(new Date());
-	  
-	  Map<String, Object> parametersEmulation = new HashMap<String, Object>();
-	  parametersEmulation.put("param1", param1);
-	  parametersEmulation.put("filterParams", param1);
-	  
-	  MetaObject meta = SystemMetaObject.forObject(parametersEmulation);
-	  
-	  assertEquals(param1.get(0), meta.getValue("filterParams[0]"));
-	  assertEquals(param1.get(1), meta.getValue("filterParams[1]"));
-	  assertEquals(param1.get(2), meta.getValue("filterParams[2]"));
-	  
-	  assertTrue(meta.hasGetter("filterParams[0]"));
-	  assertTrue(meta.hasGetter("filterParams[1]"));
-	  assertTrue(meta.hasGetter("filterParams[2]"));
+    List<Object> param1 = new ArrayList<Object>();
+    param1.add("firstParam");
+    param1.add(222);
+    param1.add(new Date());
+
+    Map<String, Object> parametersEmulation = new HashMap<String, Object>();
+    parametersEmulation.put("param1", param1);
+    parametersEmulation.put("filterParams", param1);
+
+    MetaObject meta = SystemMetaObject.forObject(parametersEmulation);
+
+    assertEquals(param1.get(0), meta.getValue("filterParams[0]"));
+    assertEquals(param1.get(1), meta.getValue("filterParams[1]"));
+    assertEquals(param1.get(2), meta.getValue("filterParams[2]"));
+
+    assertTrue(meta.hasGetter("filterParams[0]"));
+    assertTrue(meta.hasGetter("filterParams[1]"));
+    assertTrue(meta.hasGetter("filterParams[2]"));
   }
 
 }

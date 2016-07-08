@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -42,8 +43,8 @@ public class CallableStatementHandler extends BaseStatementHandler {
     super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
   }
 
-  public int update(Statement statement)
-      throws SQLException {
+  @Override
+  public int update(Statement statement) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
     int rows = cs.getUpdateCount();
@@ -54,14 +55,14 @@ public class CallableStatementHandler extends BaseStatementHandler {
     return rows;
   }
 
-  public void batch(Statement statement)
-      throws SQLException {
+  @Override
+  public void batch(Statement statement) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.addBatch();
   }
 
-  public <E> List<E> query(Statement statement, ResultHandler resultHandler)
-      throws SQLException {
+  @Override
+  public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
     CallableStatement cs = (CallableStatement) statement;
     cs.execute();
     List<E> resultList = resultSetHandler.<E>handleResultSets(cs);
@@ -69,6 +70,16 @@ public class CallableStatementHandler extends BaseStatementHandler {
     return resultList;
   }
 
+  @Override
+  public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
+    CallableStatement cs = (CallableStatement) statement;
+    cs.execute();
+    Cursor<E> resultList = resultSetHandler.<E>handleCursorResultSets(cs);
+    resultSetHandler.handleOutputParameters(cs);
+    return resultList;
+  }
+
+  @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     String sql = boundSql.getSql();
     if (mappedStatement.getResultSetType() != null) {
@@ -78,6 +89,7 @@ public class CallableStatementHandler extends BaseStatementHandler {
     }
   }
 
+  @Override
   public void parameterize(Statement statement) throws SQLException {
     registerOutputParameters((CallableStatement) statement);
     parameterHandler.setParameters((CallableStatement) statement);

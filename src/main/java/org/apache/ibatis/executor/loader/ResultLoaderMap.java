@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BaseExecutor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
@@ -109,7 +110,7 @@ public class ResultLoaderMap {
     /**
      * Object to check whether we went through serialization..
      */
-    private transient final Object serializationCheck = new Object();
+    private final transient Object serializationCheck = new Object();
     /**
      * Meta object which sets loaded properties.
      */
@@ -155,10 +156,13 @@ public class ResultLoaderMap {
 
           this.configurationFactory = resultLoader.configuration.getConfigurationFactory();
         } else {
-          this.getLogger().debug("Property [" + this.property + "] of ["
-                  + metaResultObject.getOriginalObject().getClass() + "] cannot be loaded "
-                  + "after deserialization. Make sure it's loaded before serializing "
-                  + "forenamed object.");
+          Log log = this.getLogger();
+          if (log.isDebugEnabled()) {
+            log.debug("Property [" + this.property + "] of ["
+                    + metaResultObject.getOriginalObject().getClass() + "] cannot be loaded "
+                    + "after deserialization. Make sure it's loaded before serializing "
+                    + "forenamed object.");
+          }
         }
       }
     }
@@ -166,8 +170,12 @@ public class ResultLoaderMap {
     public void load() throws SQLException {
       /* These field should not be null unless the loadpair was serialized.
        * Yet in that case this method should not be called. */
-      if (this.metaResultObject == null) throw new IllegalArgumentException("metaResultObject is null");
-      if (this.resultLoader == null) throw new IllegalArgumentException("resultLoader is null");
+      if (this.metaResultObject == null) {
+        throw new IllegalArgumentException("metaResultObject is null");
+      }
+      if (this.resultLoader == null) {
+        throw new IllegalArgumentException("resultLoader is null");
+      }
 
       this.load(null);
     }
@@ -251,11 +259,10 @@ public class ResultLoaderMap {
       }
 
       if (!(configurationObject instanceof Configuration)) {
-        final boolean isNull = (configurationObject == null);
         throw new ExecutorException("Cannot get Configuration as factory method ["
                 + this.configurationFactory + "]#["
                 + FACTORY_METHOD + "] didn't return [" + Configuration.class + "] but ["
-                + (isNull ? "null" : configurationObject.getClass()) + "].");
+                + (configurationObject == null ? "null" : configurationObject.getClass()) + "].");
       }
 
       return Configuration.class.cast(configurationObject);
@@ -292,6 +299,11 @@ public class ResultLoaderMap {
 
     @Override
     protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+      throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
   }

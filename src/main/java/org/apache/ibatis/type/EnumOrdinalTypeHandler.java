@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,10 +29,14 @@ public class EnumOrdinalTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E
   private final E[] enums;
 
   public EnumOrdinalTypeHandler(Class<E> type) {
-    if (type == null) throw new IllegalArgumentException("Type argument cannot be null");
+    if (type == null) {
+      throw new IllegalArgumentException("Type argument cannot be null");
+    }
     this.type = type;
     this.enums = type.getEnumConstants();
-    if (this.enums == null) throw new IllegalArgumentException(type.getSimpleName() + " does not represent an enum type.");
+    if (this.enums == null) {
+      throw new IllegalArgumentException(type.getSimpleName() + " does not represent an enum type.");
+    }
   }
 
   @Override

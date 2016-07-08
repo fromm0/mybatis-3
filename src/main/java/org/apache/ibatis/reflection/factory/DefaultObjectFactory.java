@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,23 +37,25 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
   private static final long serialVersionUID = -8855120656740914948L;
 
+  @Override
   public <T> T create(Class<T> type) {
     return create(type, null, null);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
   public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     Class<?> classToCreate = resolveInterface(type);
-    @SuppressWarnings("unchecked")
     // we know types are assignable
-    T created = (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
-    return created;
+    return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
   }
 
+  @Override
   public void setProperties(Properties properties) {
     // no props for default
   }
 
-  private <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
+  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;
       if (constructorArgTypes == null || constructorArgs == null) {
@@ -70,18 +72,20 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
       return constructor.newInstance(constructorArgs.toArray(new Object[constructorArgs.size()]));
     } catch (Exception e) {
       StringBuilder argTypes = new StringBuilder();
-      if (constructorArgTypes != null) {
+      if (constructorArgTypes != null && !constructorArgTypes.isEmpty()) {
         for (Class<?> argType : constructorArgTypes) {
           argTypes.append(argType.getSimpleName());
           argTypes.append(",");
         }
+        argTypes.deleteCharAt(argTypes.length() - 1); // remove trailing ,
       }
       StringBuilder argValues = new StringBuilder();
-      if (constructorArgs != null) {
+      if (constructorArgs != null && !constructorArgs.isEmpty()) {
         for (Object argValue : constructorArgs) {
           argValues.append(String.valueOf(argValue));
           argValues.append(",");
         }
+        argValues.deleteCharAt(argValues.length() - 1); // remove trailing ,
       }
       throw new ReflectionException("Error instantiating " + type + " with invalid types (" + argTypes + ") or values (" + argValues + "). Cause: " + e, e);
     }
@@ -103,6 +107,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     return classToCreate;
   }
 
+  @Override
   public <T> boolean isCollection(Class<T> type) {
     return Collection.class.isAssignableFrom(type);
   }

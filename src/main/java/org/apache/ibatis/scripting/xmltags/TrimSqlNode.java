@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class TrimSqlNode implements SqlNode {
     this.configuration = configuration;
   }
 
+  @Override
   public boolean apply(DynamicContext context) {
     FilteredDynamicContext filteredDynamicContext = new FilteredDynamicContext(context);
     boolean result = contents.apply(filteredDynamicContext);
@@ -59,15 +60,11 @@ public class TrimSqlNode implements SqlNode {
   private static List<String> parseOverrides(String overrides) {
     if (overrides != null) {
       final StringTokenizer parser = new StringTokenizer(overrides, "|", false);
-      return new ArrayList<String>() {
-        private static final long serialVersionUID = -2504816393625384165L;
-
-        {
-          while (parser.hasMoreTokens()) {
-            add(parser.nextToken().toUpperCase(Locale.ENGLISH));
-          }
-        }
-      };
+      final List<String> list = new ArrayList<String>(parser.countTokens());
+      while (parser.hasMoreTokens()) {
+        list.add(parser.nextToken().toUpperCase(Locale.ENGLISH));
+      }
+      return list;
     }
     return Collections.emptyList();
   }

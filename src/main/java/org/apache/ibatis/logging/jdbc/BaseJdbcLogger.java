@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2014 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -50,12 +50,16 @@ public abstract class BaseJdbcLogger {
    */
   public BaseJdbcLogger(Log log, int queryStack) {
     this.statementLog = log;
-    if (queryStack == 0) queryStack = 1;
-    this.queryStack = queryStack;
+    if (queryStack == 0) {
+      this.queryStack = 1;
+    } else {
+      this.queryStack = queryStack;
+    }
   }
 
   static {
     SET_METHODS.add("setString");
+    SET_METHODS.add("setNString");
     SET_METHODS.add("setInt");
     SET_METHODS.add("setByte");
     SET_METHODS.add("setShort");
@@ -73,7 +77,9 @@ public abstract class BaseJdbcLogger {
     SET_METHODS.add("setBoolean");
     SET_METHODS.add("setBytes");
     SET_METHODS.add("setCharacterStream");
+    SET_METHODS.add("setNCharacterStream");
     SET_METHODS.add("setClob");
+    SET_METHODS.add("setNClob");
     SET_METHODS.add("setObject");
     SET_METHODS.add("setNull");
 

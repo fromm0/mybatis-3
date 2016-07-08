@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public class SubstitutionInAnnotsTest {
   @BeforeClass
   public static void setUp() throws Exception {
     Class.forName("org.hsqldb.jdbcDriver");
-   	Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:annots", "sa", "");
-   	Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/substitution_in_annots/CreateDB.sql");
+    Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:annots", "sa", "");
+    Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/substitution_in_annots/CreateDB.sql");
     ScriptRunner runner = new ScriptRunner(c);
     runner.setLogWriter(null);
     runner.setErrorLogWriter(null);

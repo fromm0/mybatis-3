@@ -1,5 +1,5 @@
-/*
- *    Copyright 2013 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,30 +34,37 @@ public class Log4j2LoggerImpl implements Log {
     log = logger;
   }
 
+  @Override
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
 
+  @Override
   public boolean isTraceEnabled() {
     return log.isTraceEnabled();
   }
 
+  @Override
   public void error(String s, Throwable e) {
     log.error(MARKER, s, e);
   }
 
+  @Override
   public void error(String s) {
     log.error(MARKER, s);
   }
 
+  @Override
   public void debug(String s) {
     log.debug(MARKER, s);
   }
 
+  @Override
   public void trace(String s) {
     log.trace(MARKER, s);
   }
 
+  @Override
   public void warn(String s) {
     log.warn(MARKER, s);
   }

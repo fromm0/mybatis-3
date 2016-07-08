@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2011 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.annotations;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,6 +27,7 @@ import org.apache.ibatis.cache.impl.PerpetualCache;
 /**
  * @author Clinton Begin
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface CacheNamespace {
@@ -33,9 +35,12 @@ public @interface CacheNamespace {
 
   Class<? extends org.apache.ibatis.cache.Cache> eviction() default LruCache.class;
 
-  long flushInterval() default 3600000;
+  long flushInterval() default 0;
 
-  int size() default 1000;
+  int size() default 1024;
 
   boolean readWrite() default true;
+  
+  boolean blocking() default false;
+  
 }

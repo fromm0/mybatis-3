@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ public class ParameterMapReferenceTest {
   private void testCrossReference(SqlSessionFactory sqlSessionFactory) throws Exception {
     SqlSession sqlSession = sqlSessionFactory.openSession();
     try {
-  	  ParameterMapReferencePersonMapper personMapper = sqlSession.getMapper(ParameterMapReferencePersonMapper.class);
-  	  Person parameter = new Person();
-  	  parameter.setId(1);
+      ParameterMapReferencePersonMapper personMapper = sqlSession.getMapper(ParameterMapReferencePersonMapper.class);
+      Person parameter = new Person();
+      parameter.setId(1);
       Person person = personMapper.select(parameter);
       assertEquals((Integer)1, person.getId());
 

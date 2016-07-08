@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,23 +29,23 @@ import org.apache.ibatis.logging.LogFactory;
  * arbitrary conditions. The two most common conditions are that a class implements/extends
  * another class, or that is it annotated with a specific annotation. However, through the use
  * of the {@link Test} class it is possible to search using arbitrary conditions.</p>
- * <p/>
+ *
  * <p>A ClassLoader is used to locate all locations (directories and jar files) in the class
  * path that contain classes within certain packages, and then to load those classes and
  * check them. By default the ClassLoader returned by
  * {@code Thread.currentThread().getContextClassLoader()} is used, but this can be overridden
  * by calling {@link #setClassLoader(ClassLoader)} prior to invoking any of the {@code find()}
  * methods.</p>
- * <p/>
+ *
  * <p>General searches are initiated by calling the
  * {@link #find(org.apache.ibatis.io.ResolverUtil.Test, String)} ()} method and supplying
  * a package name and a Test instance. This will cause the named package <b>and all sub-packages</b>
  * to be scanned for classes that meet the test. There are also utility methods for the common
  * use cases of scanning multiple packages for extensions of particular classes, or classes
  * annotated with a specific annotation.</p>
- * <p/>
+ *
  * <p>The standard usage pattern for the ResolverUtil class is as follows:</p>
- * <p/>
+ *
  * <pre>
  * ResolverUtil&lt;ActionBean&gt; resolver = new ResolverUtil&lt;ActionBean&gt;();
  * resolver.findImplementation(ActionBean.class, pkg1, pkg2);
@@ -87,6 +87,7 @@ public class ResolverUtil<T> {
     }
 
     /** Returns true if type is assignable to the parent type supplied in the constructor. */
+    @Override
     public boolean matches(Class<?> type) {
       return type != null && parent.isAssignableFrom(type);
     }
@@ -110,6 +111,7 @@ public class ResolverUtil<T> {
     }
 
     /** Returns true if the type is annotated with the class provided to the constructor. */
+    @Override
     public boolean matches(Class<?> type) {
       return type != null && type.isAnnotationPresent(annotation);
     }
@@ -169,8 +171,9 @@ public class ResolverUtil<T> {
    * @param packageNames one or more package names to scan (including subpackages) for classes
    */
   public ResolverUtil<T> findImplementations(Class<?> parent, String... packageNames) {
-    if (packageNames == null)
+    if (packageNames == null) {
       return this;
+    }
 
     Test test = new IsA(parent);
     for (String pkg : packageNames) {
@@ -188,8 +191,9 @@ public class ResolverUtil<T> {
    * @param packageNames one or more package names to scan (including subpackages) for classes
    */
   public ResolverUtil<T> findAnnotated(Class<? extends Annotation> annotation, String... packageNames) {
-    if (packageNames == null)
+    if (packageNames == null) {
       return this;
+    }
 
     Test test = new AnnotatedWith(annotation);
     for (String pkg : packageNames) {
@@ -215,8 +219,9 @@ public class ResolverUtil<T> {
     try {
       List<String> children = VFS.getInstance().list(path);
       for (String child : children) {
-        if (child.endsWith(".class"))
+        if (child.endsWith(".class")) {
           addIfMatching(test, child);
+        }
       }
     } catch (IOException ioe) {
       log.error("Could not read package: " + packageName, ioe);
@@ -247,7 +252,9 @@ public class ResolverUtil<T> {
     try {
       String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
       ClassLoader loader = getClassLoader();
-      log.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
+      if (log.isDebugEnabled()) {
+        log.debug("Checking to see if class " + externalName + " matches criteria [" + test + "]");
+      }
 
       Class<?> type = loader.loadClass(externalName);
       if (test.matches(type)) {

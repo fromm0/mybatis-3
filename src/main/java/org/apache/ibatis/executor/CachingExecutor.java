@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2014 the original author or authors.
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.TransactionalCacheManager;
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -45,10 +46,12 @@ public class CachingExecutor implements Executor {
     delegate.setExecutorWrapper(this);
   }
 
+  @Override
   public Transaction getTransaction() {
     return delegate.getTransaction();
   }
 
+  @Override
   public void close(boolean forceRollback) {
     try {
       //issues #499, #524 and #573
@@ -62,21 +65,31 @@ public class CachingExecutor implements Executor {
     }
   }
 
+  @Override
   public boolean isClosed() {
     return delegate.isClosed();
   }
 
+  @Override
   public int update(MappedStatement ms, Object parameterObject) throws SQLException {
     flushCacheIfRequired(ms);
     return delegate.update(ms, parameterObject);
   }
 
+  @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
+  @Override
+  public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
+    flushCacheIfRequired(ms);
+    return delegate.queryCursor(ms, parameter, rowBounds);
+  }
+
+  @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
     Cache cache = ms.getCache();
@@ -88,7 +101,7 @@ public class CachingExecutor implements Executor {
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
           list = delegate.<E> query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
-          tcm.putObject(cache, key, list); // issue #578. Query must be not synchronized to prevent deadlocks
+          tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
       }
@@ -96,15 +109,18 @@ public class CachingExecutor implements Executor {
     return delegate.<E> query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
+  @Override
   public List<BatchResult> flushStatements() throws SQLException {
     return delegate.flushStatements();
   }
 
+  @Override
   public void commit(boolean required) throws SQLException {
     delegate.commit(required);
     tcm.commit();
   }
 
+  @Override
   public void rollback(boolean required) throws SQLException {
     try {
       delegate.rollback(required);
@@ -125,18 +141,22 @@ public class CachingExecutor implements Executor {
     }
   }
 
+  @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     return delegate.createCacheKey(ms, parameterObject, rowBounds, boundSql);
   }
 
+  @Override
   public boolean isCached(MappedStatement ms, CacheKey key) {
     return delegate.isCached(ms, key);
   }
 
+  @Override
   public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType) {
     delegate.deferLoad(ms, resultObject, property, key, targetType);
   }
 
+  @Override
   public void clearLocalCache() {
     delegate.clearLocalCache();
   }

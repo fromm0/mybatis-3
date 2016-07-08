@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 the original author or authors.
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,17 +17,21 @@ package org.apache.ibatis.jdbc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Clinton Begin
  * @author Jeff Butler
  * @author Adam Gent
+ * @author Kazuki Shimizu
  */
 public abstract class AbstractSQL<T> {
 
   private static final String AND = ") \nAND (";
   private static final String OR = ") \nOR (";
+
+  private SQLStatement sql = new SQLStatement();
 
   public abstract T getSelf();
 
@@ -39,6 +43,14 @@ public abstract class AbstractSQL<T> {
 
   public T SET(String sets) {
     sql().sets.add(sets);
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T SET(String... sets) {
+    sql().sets.addAll(Arrays.asList(sets));
     return getSelf();
   }
 
@@ -60,7 +72,25 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T SELECT(String... columns) {
+    sql().statementType = SQLStatement.StatementType.SELECT;
+    sql().select.addAll(Arrays.asList(columns));
+    return getSelf();
+  }
+
   public T SELECT_DISTINCT(String columns) {
+    sql().distinct = true;
+    SELECT(columns);
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T SELECT_DISTINCT(String... columns) {
     sql().distinct = true;
     SELECT(columns);
     return getSelf();
@@ -77,8 +107,24 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T FROM(String... tables) {
+    sql().tables.addAll(Arrays.asList(tables));
+    return getSelf();
+  }
+
   public T JOIN(String join) {
     sql().join.add(join);
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T JOIN(String... joins) {
+    sql().join.addAll(Arrays.asList(joins));
     return getSelf();
   }
 
@@ -87,8 +133,24 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T INNER_JOIN(String... joins) {
+    sql().innerJoin.addAll(Arrays.asList(joins));
+    return getSelf();
+  }
+
   public T LEFT_OUTER_JOIN(String join) {
     sql().leftOuterJoin.add(join);
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T LEFT_OUTER_JOIN(String... joins) {
+    sql().leftOuterJoin.addAll(Arrays.asList(joins));
     return getSelf();
   }
 
@@ -97,13 +159,38 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T RIGHT_OUTER_JOIN(String... joins) {
+    sql().rightOuterJoin.addAll(Arrays.asList(joins));
+    return getSelf();
+  }
+
   public T OUTER_JOIN(String join) {
     sql().outerJoin.add(join);
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T OUTER_JOIN(String... joins) {
+    sql().outerJoin.addAll(Arrays.asList(joins));
+    return getSelf();
+  }
+
   public T WHERE(String conditions) {
     sql().where.add(conditions);
+    sql().lastList = sql().where;
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T WHERE(String... conditions) {
+    sql().where.addAll(Arrays.asList(conditions));
     sql().lastList = sql().where;
     return getSelf();
   }
@@ -123,8 +210,25 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * @since 3.4.2
+   */
+  public T GROUP_BY(String... columns) {
+    sql().groupBy.addAll(Arrays.asList(columns));
+    return getSelf();
+  }
+
   public T HAVING(String conditions) {
     sql().having.add(conditions);
+    sql().lastList = sql().having;
+    return getSelf();
+  }
+
+  /**
+   * @since 3.4.2
+   */
+  public T HAVING(String... conditions) {
+    sql().having.addAll(Arrays.asList(conditions));
     sql().lastList = sql().having;
     return getSelf();
   }
@@ -134,7 +238,13 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
-  private SQLStatement sql = new SQLStatement();
+  /**
+   * @since 3.4.2
+   */
+  public T ORDER_BY(String... columns) {
+    sql().orderBy.addAll(Arrays.asList(columns));
+    return getSelf();
+  }
 
   private SQLStatement sql() {
     return sql;
@@ -163,7 +273,9 @@ public abstract class AbstractSQL<T> {
 
     public SafeAppendable append(CharSequence s) {
       try {
-        if (empty && s.length() > 0) empty = false;
+        if (empty && s.length() > 0) {
+          empty = false;
+        }
         a.append(s);
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -201,11 +313,16 @@ public abstract class AbstractSQL<T> {
     List<String> values = new ArrayList<String>();
     boolean distinct;
 
+    public SQLStatement() {
+        // Prevent Synthetic Access
+    }
+
     private void sqlClause(SafeAppendable builder, String keyword, List<String> parts, String open, String close,
                            String conjunction) {
       if (!parts.isEmpty()) {
-        if (!builder.isEmpty())
+        if (!builder.isEmpty()) {
           builder.append("\n");
+        }
         builder.append(keyword);
         builder.append(" ");
         builder.append(open);
