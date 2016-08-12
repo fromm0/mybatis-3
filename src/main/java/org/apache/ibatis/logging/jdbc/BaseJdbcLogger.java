@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.logging.jdbc;
 
+import java.sql.Array;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -105,11 +107,45 @@ public abstract class BaseJdbcLogger {
       if (value == null) {
         typeList.add("null");
       } else {
-        typeList.add(value + "(" + value.getClass().getSimpleName() + ")");
+        typeList.add(objectValueString(value) + "(" + value.getClass().getSimpleName() + ")");
       }
     }
     final String parameters = typeList.toString();
     return parameters.substring(1, parameters.length() - 1);
+  }
+
+  protected String objectValueString(Object value) {
+    if (value instanceof Array) {
+      return arrayValueString((Array) value);
+    }
+    return value.toString();
+  }
+
+  protected String arrayValueString(Array array) {
+    try {
+      Object value = array.getArray();
+      if (value instanceof Object[]) {
+        return Arrays.toString((Object[]) value);
+      } else if (value instanceof long[]) {
+        return Arrays.toString((long[]) value);
+      } else if (value instanceof int[]) {
+        return Arrays.toString((int[]) value);
+      } else if (value instanceof short[]) {
+        return Arrays.toString((short[]) value);
+      } else if (value instanceof char[]) {
+        return Arrays.toString((char[]) value);
+      } else if (value instanceof byte[]) {
+        return Arrays.toString((byte[]) value);
+      } else if (value instanceof boolean[]) {
+        return Arrays.toString((boolean[]) value);
+      } else if (value instanceof float[]) {
+        return Arrays.toString((float[]) value);
+      } else {
+        return Arrays.toString((double[]) value);
+      }
+    } catch (SQLException e) {
+      return array.toString();
+    }
   }
 
   protected String getColumnString() {
