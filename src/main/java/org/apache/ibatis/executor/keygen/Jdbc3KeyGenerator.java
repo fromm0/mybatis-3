@@ -1,5 +1,5 @@
 /**
- *    Copyright 2009-2016 the original author or authors.
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
@@ -32,8 +36,15 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * @author Kazuki Shimizu
  */
 public class Jdbc3KeyGenerator implements KeyGenerator {
+
+  /**
+   * A shared instance.
+   * @since 3.4.3
+   */
+  public static final Jdbc3KeyGenerator INSTANCE = new Jdbc3KeyGenerator();
 
   @Override
   public void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
@@ -115,10 +126,14 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
 
   private void populateKeys(ResultSet rs, MetaObject metaParam, String[] keyProperties, TypeHandler<?>[] typeHandlers) throws SQLException {
     for (int i = 0; i < keyProperties.length; i++) {
+      String property = keyProperties[i];
+      if (!metaParam.hasSetter(property)) {
+        throw new ExecutorException("No setter found for the keyProperty '" + property + "' in " + metaParam.getOriginalObject().getClass().getName() + ".");
+      }
       TypeHandler<?> th = typeHandlers[i];
       if (th != null) {
         Object value = th.getResult(rs, i + 1);
-        metaParam.setValue(keyProperties[i], value);
+        metaParam.setValue(property, value);
       }
     }
   }
